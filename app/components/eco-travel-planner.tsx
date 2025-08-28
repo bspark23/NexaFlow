@@ -838,12 +838,12 @@ export function EcoTravelPlanner({ darkMode }: { darkMode: boolean }) {
         className={`transition-all duration-300 ${
           darkMode
             ? "bg-gray-800/50 border-gray-700 backdrop-blur-sm"
-            : "bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200/50 backdrop-blur-sm"
+            : "bg-gradient-to-r from-teal-50 to-purple-50 border-teal-200/50 backdrop-blur-sm"
         }`}
       >
         <CardHeader>
           <CardTitle className={`flex items-center gap-2 ${darkMode ? "text-white" : "text-gray-800"}`}>
-            <Globe className="h-6 w-6 text-emerald-500" />
+            <Globe className="h-6 w-6 text-teal-500" />
             Eco Travel Planner
           </CardTitle>
           <p className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
@@ -859,7 +859,7 @@ export function EcoTravelPlanner({ darkMode }: { darkMode: boolean }) {
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 ${
                 index <= activeStep
-                  ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg"
+                  ? "bg-gradient-to-r from-teal-500 to-purple-500 text-white shadow-lg"
                   : darkMode
                     ? "bg-gray-700 text-gray-400"
                     : "bg-gray-200 text-gray-500"
@@ -872,7 +872,7 @@ export function EcoTravelPlanner({ darkMode }: { darkMode: boolean }) {
               <div
                 className={`w-8 h-0.5 ml-4 transition-all duration-300 ${
                   index < activeStep
-                    ? "bg-gradient-to-r from-emerald-500 to-teal-500"
+                    ? "bg-gradient-to-r from-teal-500 to-purple-500"
                     : darkMode
                       ? "bg-gray-700"
                       : "bg-gray-200"
@@ -892,7 +892,7 @@ export function EcoTravelPlanner({ darkMode }: { darkMode: boolean }) {
           }`}
         >
           <CardContent className="p-8 text-center">
-            <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center mb-4 mx-auto animate-pulse">
+            <div className="w-16 h-16 bg-gradient-to-r from-teal-500 to-purple-500 rounded-full flex items-center justify-center mb-4 mx-auto animate-pulse">
               <Globe className="h-8 w-8 text-white animate-spin" />
             </div>
             <h3 className={`text-lg font-semibold mb-2 ${darkMode ? "text-white" : "text-gray-800"}`}>
@@ -970,7 +970,7 @@ export function EcoTravelPlanner({ darkMode }: { darkMode: boolean }) {
                       onClick={() => setPreferences({ ...preferences, personality: value as any })}
                       className={`flex flex-col h-16 transition-all duration-300 ${
                         preferences.personality === value
-                          ? "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg"
+                          ? "bg-gradient-to-r from-teal-500 to-purple-500 hover:from-teal-600 hover:to-purple-600 shadow-lg"
                           : ""
                       }`}
                     >
@@ -997,7 +997,7 @@ export function EcoTravelPlanner({ darkMode }: { darkMode: boolean }) {
                       onClick={() => setPreferences({ ...preferences, mood: value as any })}
                       className={`flex flex-col h-16 transition-all duration-300 ${
                         preferences.mood === value
-                          ? "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg"
+                          ? "bg-gradient-to-r from-teal-500 to-purple-500 hover:from-teal-600 hover:to-purple-600 shadow-lg"
                           : ""
                       }`}
                     >
@@ -1024,7 +1024,7 @@ export function EcoTravelPlanner({ darkMode }: { darkMode: boolean }) {
                       onClick={() => setPreferences({ ...preferences, budget: value as any })}
                       className={`flex flex-col h-16 transition-all duration-300 ${
                         preferences.budget === value
-                          ? "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg"
+                          ? "bg-gradient-to-r from-teal-500 to-purple-500 hover:from-teal-600 hover:to-purple-600 shadow-lg"
                           : ""
                       }`}
                     >
@@ -1201,7 +1201,7 @@ export function EcoTravelPlanner({ darkMode }: { darkMode: boolean }) {
           >
             <CardHeader>
               <CardTitle className={`flex items-center gap-2 ${darkMode ? "text-white" : "text-gray-800"}`}>
-                <TrendingUp className="h-5 w-5 text-emerald-500" />
+                <TrendingUp className="h-5 w-5 text-teal-500" />
                 Environmental Travel Score
               </CardTitle>
             </CardHeader>
@@ -1263,7 +1263,7 @@ export function EcoTravelPlanner({ darkMode }: { darkMode: boolean }) {
           <div className="flex justify-center">
             <Button
               onClick={() => setActiveStep(2)}
-              className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-8 py-3 transition-all duration-300"
+              className="bg-gradient-to-r from-teal-500 to-purple-500 hover:from-teal-600 hover:to-purple-600 text-white px-8 py-3 transition-all duration-300"
             >
               Continue to Travel Planning
               <ChevronRight className="h-4 w-4 ml-2" />
