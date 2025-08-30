@@ -42,7 +42,6 @@ import {
   Clock,
 } from "lucide-react"
 import { WeatherChart } from "./weather-chart"
-import { InteractiveMap } from "./interactive-map"
 
 interface Country {
   name: { common: string }
@@ -1257,8 +1256,37 @@ export function EcoTravelPlanner({ darkMode }: { darkMode: boolean }) {
             </CardContent>
           </Card>
 
-          {/* Interactive Map */}
-          <InteractiveMap location={selectedLocation} weatherData={weatherData} darkMode={darkMode} />
+          {/* Location Summary */}
+          <Card className={`transition-all duration-300 ${darkMode ? "bg-gray-800/50 border-gray-700 backdrop-blur-sm" : "bg-white/70 backdrop-blur-sm border-white/50"}`}>
+            <CardHeader>
+              <CardTitle className={`flex items-center gap-2 ${darkMode ? "text-white" : "text-gray-800"}`}>
+                <MapPin className="h-5 w-5 text-teal-500" />
+                Selected Location
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className={`font-medium ${darkMode ? "text-white" : "text-gray-800"}`}>
+                    {selectedLocation.name}
+                  </span>
+                  <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">
+                    📍 Selected
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className={`${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+                    <span className="font-medium">Coordinates:</span><br />
+                    {selectedLocation.lat.toFixed(4)}°, {selectedLocation.lon.toFixed(4)}°
+                  </div>
+                  <div className={`${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+                    <span className="font-medium">Weather:</span><br />
+                    {weatherData?.current?.temp ? `${Math.round(weatherData.current.temp)}°C` : 'Loading...'}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           <div className="flex justify-center">
             <Button

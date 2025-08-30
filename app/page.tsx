@@ -21,8 +21,8 @@ import {
   Compass,
 } from "lucide-react"
 import { EcoTravelPlanner } from "./components/eco-travel-planner"
-import { EnhancedTravelPlanner } from "./components/enhanced-travel-planner"
-import { AITravelAssistant } from "./components/ai-travel-assistant"
+import { SmartAssistant } from "./components/smart-assistant"
+import { MapNavigation } from "../components/map-navigation"
 
 // Import productivity enhancement coordinator
 import ProductivityCoordinatorHook from "../.kiro/hooks/productivity-coordinator-hook"
@@ -76,18 +76,34 @@ export default function NexaFlowApp() {
   const [error, setError] = useState<string | null>(null)
   const [darkMode, setDarkMode] = useState(false)
   const [searchCity, setSearchCity] = useState("")
-  const [currentTime, setCurrentTime] = useState(new Date())
+  const [currentTime, setCurrentTime] = useState<Date | null>(null)
   const [currentFact, setCurrentFact] = useState(0)
-  const [activeTab, setActiveTab] = useState<"uv" | "travel" | "aitravel" | "analytics" | "gamification">("uv")
+  const [activeTab, setActiveTab] = useState<"uv" | "travel" | "assistant" | "analytics" | "gamification" | "navigation">("uv")
   const [boostMode, setBoostMode] = useState(false)
   const [keySequence, setKeySequence] = useState("")
   const [isListening, setIsListening] = useState(false)
   const [voiceRecognition, setVoiceRecognition] = useState<any>(null)
+  const [isClient, setIsClient] = useState(false)
 
   const API_KEY = "f68e14d9f5d8fffea3bd365b3a9f8e4d"
 
-  // Load dark mode preference from localStorage and initialize analytics
+  // Helper function for safe localStorage access
+  const getStorageItem = (key: string, defaultValue: string = '0'): string => {
+    if (!isClient) return defaultValue
+    return localStorage.getItem(key) || defaultValue
+  }
+
+  const setStorageItem = (key: string, value: string): void => {
+    if (isClient) {
+      localStorage.setItem(key, value)
+    }
+  }
+
+  // Initialize client-side state and load preferences
   useEffect(() => {
+    setIsClient(true)
+    setCurrentTime(new Date())
+    
     const savedDarkMode = localStorage.getItem("nexaflow-dark-mode")
     if (savedDarkMode) {
       setDarkMode(JSON.parse(savedDarkMode))
@@ -109,13 +125,17 @@ export default function NexaFlowApp() {
 
   // Save dark mode preference to localStorage
   useEffect(() => {
-    localStorage.setItem("nexaflow-dark-mode", JSON.stringify(darkMode))
-  }, [darkMode])
+    if (isClient) {
+      localStorage.setItem("nexaflow-dark-mode", JSON.stringify(darkMode))
+    }
+  }, [darkMode, isClient])
 
   useEffect(() => {
+    if (!isClient) return
+    
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
-  }, [])
+  }, [isClient])
 
   // Auto-refresh UV data every 30 minutes for real-time accuracy
   useEffect(() => {
@@ -400,8 +420,8 @@ export default function NexaFlowApp() {
       setSearchCity("")
       
       // Update analytics counter for manual searches
-      const currentSearchCount = parseInt(localStorage.getItem('nexaflow-search-count') || '0')
-      localStorage.setItem('nexaflow-search-count', (currentSearchCount + 1).toString())
+      const currentSearchCount = parseInt(getStorageItem('nexaflow-search-count'))
+      setStorageItem('nexaflow-search-count', (currentSearchCount + 1).toString())
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred")
     } finally {
@@ -603,10 +623,10 @@ export default function NexaFlowApp() {
       return;
     }
     
-    if (command.includes('ai travel') || command.includes('travel assistant')) {
-      setActiveTab('aitravel');
-      showVoiceMessage('🤖 Switched to AI Travel Assistant', 'success');
-      speak('Showing AI travel assistant');
+    if (command.includes('assistant') || command.includes('smart assistant') || command.includes('chat')) {
+      setActiveTab('assistant');
+      showVoiceMessage('🤖 Switched to Smart Assistant', 'success');
+      speak('Showing smart assistant');
       return;
     }
     
@@ -621,6 +641,13 @@ export default function NexaFlowApp() {
       setActiveTab('gamification');
       showVoiceMessage('🏆 Switched to Rewards', 'success');
       speak('Showing rewards and achievements');
+      return;
+    }
+    
+    if (command.includes('show navigation') || command.includes('navigation') || command.includes('show map') || command.includes('map')) {
+      setActiveTab('navigation');
+      showVoiceMessage('🗺️ Switched to Navigation', 'success');
+      speak('Showing map and navigation');
       return;
     }
     
@@ -672,7 +699,7 @@ export default function NexaFlowApp() {
     
     // Help command
     if (command.includes('help') || command.includes('what can you do')) {
-      const helpText = 'I can search weather, switch tabs, change themes, export reports, and more. Try saying "weather in London" or "show analytics".';
+      const helpText = 'I can search weather, switch tabs, change themes, export reports, and more. Try saying "weather in London", "show assistant", or "show analytics".';
       showVoiceMessage('💡 ' + helpText, 'info');
       speak(helpText);
       return;
@@ -797,10 +824,10 @@ export default function NexaFlowApp() {
       setLocation(locationData);
       
       // Update analytics counters
-      const currentSearchCount = parseInt(localStorage.getItem('nexaflow-search-count') || '0');
-      const currentVoiceCount = parseInt(localStorage.getItem('nexaflow-voice-count') || '0');
-      localStorage.setItem('nexaflow-search-count', (currentSearchCount + 1).toString());
-      localStorage.setItem('nexaflow-voice-count', (currentVoiceCount + 1).toString());
+      const currentSearchCount = parseInt(getStorageItem('nexaflow-search-count'));
+      const currentVoiceCount = parseInt(getStorageItem('nexaflow-voice-count'));
+      setStorageItem('nexaflow-search-count', (currentSearchCount + 1).toString());
+      setStorageItem('nexaflow-voice-count', (currentVoiceCount + 1).toString());
       
       // Generate comprehensive voice response
       const uvLevel = getUVLevel(uvResponse.value);
@@ -913,8 +940,8 @@ export default function NexaFlowApp() {
         uvIndex: uvData?.value || 0,
         timestamp: new Date().toLocaleString(),
         coordinates: location ? `${location.lat.toFixed(4)}, ${location.lon.toFixed(4)}` : 'N/A',
-        searchCount: localStorage.getItem('nexaflow-search-count') || '0',
-        voiceCount: localStorage.getItem('nexaflow-voice-count') || '0'
+        searchCount: getStorageItem('nexaflow-search-count'),
+        voiceCount: getStorageItem('nexaflow-voice-count')
       };
       
       const uvLevel = getUVLevel(weatherData.uvIndex);
@@ -995,9 +1022,9 @@ Real-time data sourced from OpenWeatherMap API.
         ...safetyInfo.recommendations.map((rec, index) => [`Recommendation ${index + 1}`, rec]),
         [''],
         ['USAGE STATISTICS'],
-        ['Weather Searches Today', localStorage.getItem('nexaflow-search-count') || '0'],
-        ['Voice Commands Used', localStorage.getItem('nexaflow-voice-count') || '0'],
-        ['App Uptime (minutes)', Math.floor((Date.now() - (parseInt(localStorage.getItem('nexaflow-start-time') || Date.now().toString()))) / 60000)],
+        ['Weather Searches Today', getStorageItem('nexaflow-search-count')],
+        ['Voice Commands Used', getStorageItem('nexaflow-voice-count')],
+        ['App Uptime (minutes)', isClient ? Math.floor((Date.now() - (parseInt(getStorageItem('nexaflow-start-time', Date.now().toString())))) / 60000) : 0],
         [''],
         ['WEATHER EDUCATION FACTS'],
         ...FACTS.map((fact, index) => [`Fact ${index + 1}`, fact])
@@ -1071,6 +1098,18 @@ Real-time data sourced from OpenWeatherMap API.
   const uvInfo = UV_TIPS[uvLevel]
   const IconComponent = uvInfo.icon
 
+  // Show loading state during hydration
+  if (!isClient) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-purple-50">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-teal-500" />
+          <p className="text-sm text-gray-600">Loading NexaFlow...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div
       className={`min-h-screen transition-all duration-500 ${
@@ -1138,15 +1177,15 @@ Real-time data sourced from OpenWeatherMap API.
             Travel
           </Button>
           <Button
-            variant={activeTab === "aitravel" ? "default" : "outline"}
-            onClick={() => setActiveTab("aitravel")}
+            variant={activeTab === "assistant" ? "default" : "outline"}
+            onClick={() => setActiveTab("assistant")}
             className={`transition-all duration-300 ${
-              activeTab === "aitravel"
+              activeTab === "assistant"
                 ? "bg-gradient-to-r from-teal-500 to-purple-500 hover:from-teal-600 hover:to-purple-600 shadow-lg"
                 : ""
             }`}
           >
-            🤖 AI Travel
+            🤖 Smart Assistant
           </Button>
           <Button
             variant={activeTab === "analytics" ? "default" : "outline"}
@@ -1170,6 +1209,18 @@ Real-time data sourced from OpenWeatherMap API.
           >
             🏆 Rewards
           </Button>
+          <Button
+            variant={activeTab === "navigation" ? "default" : "outline"}
+            onClick={() => setActiveTab("navigation")}
+            className={`transition-all duration-300 ${
+              activeTab === "navigation"
+                ? "bg-gradient-to-r from-teal-500 to-purple-500 hover:from-teal-600 hover:to-purple-600 shadow-lg"
+                : ""
+            }`}
+          >
+            <MapPin className="h-4 w-4 mr-2" />
+            Navigation
+          </Button>
         </div>
 
         {activeTab === "uv" && (
@@ -1182,7 +1233,7 @@ Real-time data sourced from OpenWeatherMap API.
                 <div className="flex items-center gap-2">
                   <Clock className={`h-4 w-4 ${darkMode ? "text-gray-300" : "text-gray-600"}`} />
                   <span className={`text-sm ${darkMode ? "text-gray-100" : "text-gray-700"}`}>
-                    {currentTime.toLocaleString()}
+                    {currentTime?.toLocaleString() || "Loading..."}
                   </span>
                 </div>
               </CardContent>
@@ -1359,9 +1410,13 @@ Real-time data sourced from OpenWeatherMap API.
           </div>
         )}
 
-        {activeTab === "aitravel" && (
+        {activeTab === "assistant" && (
           <div className="animate-in slide-in-from-right-2 duration-300">
-            <AITravelAssistant darkMode={darkMode} />
+            <SmartAssistant 
+              darkMode={darkMode} 
+              weatherData={uvData ? { main: { temp: 25, feels_like: 27, humidity: 65 }, weather: [{ description: 'clear sky' }] } : undefined}
+              location={location}
+            />
           </div>
         )}
 
@@ -1382,13 +1437,13 @@ Real-time data sourced from OpenWeatherMap API.
                       <div className="flex justify-between">
                         <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>Weather Searches</span>
                         <span className={`text-sm font-semibold ${darkMode ? "text-teal-400" : "text-teal-600"}`}>
-                          {localStorage.getItem('nexaflow-search-count') || '0'}
+                          {getStorageItem('nexaflow-search-count')}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>Voice Commands</span>
                         <span className={`text-sm font-semibold ${darkMode ? "text-purple-400" : "text-purple-600"}`}>
-                          {localStorage.getItem('nexaflow-voice-count') || '0'}
+                          {getStorageItem('nexaflow-voice-count')}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -1408,13 +1463,13 @@ Real-time data sourced from OpenWeatherMap API.
                       <div className="flex justify-between">
                         <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>Last Updated</span>
                         <span className={`text-xs font-mono ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
-                          {currentTime.toLocaleTimeString()}
+                          {currentTime?.toLocaleTimeString() || "Loading..."}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className={`text-sm ${darkMode ? "text-gray-200" : "text-gray-600"}`}>App Uptime</span>
                         <span className={`text-xs font-mono ${darkMode ? "text-blue-400" : "text-blue-600"}`}>
-                          {Math.floor((Date.now() - (parseInt(localStorage.getItem('nexaflow-start-time') || Date.now().toString()))) / 60000)} min
+                          {isClient ? Math.floor((Date.now() - (parseInt(getStorageItem('nexaflow-start-time', Date.now().toString())))) / 60000) : 0} min
                         </span>
                       </div>
                     </div>
@@ -1557,9 +1612,9 @@ Real-time data sourced from OpenWeatherMap API.
                   
                   <div className={`p-3 rounded-lg ${darkMode ? "bg-purple-900/50 border border-purple-700" : "bg-purple-50"} border-l-4 border-purple-500`}>
                     <p className={`text-sm ${darkMode ? "text-gray-100" : "text-gray-700"}`}>
-                      📈 You've made {localStorage.getItem('nexaflow-search-count') || '0'} weather searches today. 
-                      {parseInt(localStorage.getItem('nexaflow-voice-count') || '0') > 0 && 
-                        ` Voice commands used: ${localStorage.getItem('nexaflow-voice-count')}.`
+                      📈 You've made {getStorageItem('nexaflow-search-count')} weather searches today. 
+                      {parseInt(getStorageItem('nexaflow-voice-count')) > 0 && 
+                        ` Voice commands used: ${getStorageItem('nexaflow-voice-count')}.`
                       }
                     </p>
                   </div>
@@ -1671,6 +1726,12 @@ Real-time data sourced from OpenWeatherMap API.
                 </div>
               </CardContent>
             </Card>
+          </div>
+        )}
+
+        {activeTab === "navigation" && (
+          <div className="animate-in slide-in-from-bottom-2 duration-300">
+            <MapNavigation />
           </div>
         )}
       </div>
