@@ -547,7 +547,7 @@ export function MapNavigation() {
                       setLoading(true)
                       try {
                         const response = await fetch(
-                          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(currentLocation.address)}&limit=1&accept-language=en`
+                          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(currentLocation.address || '')}&limit=1&accept-language=en`
                         )
                         const data = await response.json()
                         if (data && data.length > 0) {
@@ -580,7 +580,7 @@ export function MapNavigation() {
                     setLoading(true)
                     try {
                       const response = await fetch(
-                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(currentLocation.address)}&limit=1`
+                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(currentLocation.address || '')}&limit=1`
                       )
                       const data = await response.json()
                       if (data && data.length > 0) {

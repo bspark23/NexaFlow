@@ -13,7 +13,7 @@ import {
 interface SmartAssistantProps {
   darkMode: boolean
   weatherData?: any
-  location?: { city: string; country: string; lat: number; lon: number }
+  location?: { city: string; country: string; lat: number; lon: number } | null
 }
 
 interface ChatMessage {
@@ -229,109 +229,7 @@ export function SmartAssistant({ darkMode, weatherData, location }: SmartAssista
     }
   }
 
-  // Navigation functions
-  const setDestination = async () => {
-    if (!destinationInput.trim()) {
-      showNotification('Please enter a destination', 'warning')
-      return
-    }
-    
-    if (!navigationState.currentPosition) {
-      showNotification('Waiting for your location...', 'info')
-      return
-    }
-
-    try {
-      const coords = await getCoordinates(destinationInput)
-      const distance = calculateDistance(navigationState.currentPosition, coords)
-      const estimatedTime = Math.round((distance / 60) * 60) // Assuming 60 km/h average speed
-      
-      setNavigationState(prev => ({
-        ...prev,
-        isNavigating: true,
-        destination: { lat: coords.lat, lon: coords.lon, name: destinationInput },
-        remainingDistance: distance,
-        estimatedTime
-      }))
-      
-      // Start navigation updates
-      startNavigationUpdates()
-      
-      const message = `Navigation started to ${destinationInput}. Distance: ${distance.toFixed(1)} km, estimated time: ${Math.round(estimatedTime / 60)} minutes.`
-      showNotification(message, 'success')
-      
-      if (voiceEnabled) {
-        speak(message)
-      }
-      
-      setDestinationInput("")
-    } catch (error) {
-      showNotification(`Could not find destination: ${destinationInput}`, 'error')
-    }
-  }
-
-  const stopNavigation = () => {
-    setNavigationState(prev => ({
-      ...prev,
-      isNavigating: false,
-      destination: null,
-      remainingDistance: 0,
-      estimatedTime: 0
-    }))
-    
-    if (navigationIntervalRef.current) {
-      clearInterval(navigationIntervalRef.current)
-      navigationIntervalRef.current = null
-    }
-    
-    const message = "Navigation stopped"
-    showNotification(message, 'info')
-    
-    if (voiceEnabled) {
-      speak(message)
-    }
-  }
-
-  const startNavigationUpdates = () => {
-    // Provide updates every 30 minutes
-    navigationIntervalRef.current = setInterval(() => {
-      if (navigationState.isNavigating && navigationState.destination && navigationState.currentPosition) {
-        const distance = calculateDistance(navigationState.currentPosition, navigationState.destination)
-        const timeMinutes = Math.round((distance / 60) * 60)
-        
-        if (distance < 0.1) {
-          // Arrived
-          const message = `You have arrived at ${navigationState.destination.name}!`
-          showNotification(message, 'success')
-          if (voiceEnabled) speak(message)
-          stopNavigation()
-        } else {
-          // Update progress
-          const message = `You have ${timeMinutes} minutes left to reach ${navigationState.destination.name}.`
-          if (voiceEnabled) speak(message)
-          
-          setNavigationState(prev => ({
-            ...prev,
-            remainingDistance: distance,
-            estimatedTime: timeMinutes
-          }))
-        }
-      }
-    }, 30 * 60 * 1000) // 30 minutes
-  }
-
-  const updateNavigationProgress = (currentPos: { lat: number; lon: number }) => {
-    if (!navigationState.destination) return
-    
-    const distance = calculateDistance(currentPos, navigationState.destination)
-    const timeMinutes = Math.round((distance / 60) * 60)
-    
-    setNavigationState(prev => ({
-      ...prev,
-      remainingDistance: distance,
-      estimatedTime: timeMinutes
-    }))
-  }
+  // Navigation functions removed - using dedicated navigation page
 
   // Helper functions
   const getCoordinates = async (location: string) => {

@@ -55,7 +55,7 @@ interface LeafletMapProps {
   isNavigating: boolean
   routeInfo?: RouteInfo | null
   navigationState?: NavigationState
-  routeGeometry?: [number, number][]
+  routeGeometry?: [number, number][] | null
 }
 
 export default function LeafletMap({ 
@@ -69,7 +69,6 @@ export default function LeafletMap({
   const mapRef = useRef<any>(null)
   const markersRef = useRef<any[]>([])
   const routeRef = useRef<any>(null)
-  const stepMarkersRef = useRef<any[]>([])
 
   // Show fallback if Leaflet is not available
   if (!L) {
